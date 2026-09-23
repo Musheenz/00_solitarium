@@ -1,0 +1,21 @@
+# Godot 4 cache/import cache — regenerated on open, never commit
+.godot/
+*.tmp
+
+# Exports / builds
+/export/
+/build/
+*.exe
+*.pck
+*.zip
+*.apk
+*.dmg
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor junk
+.vscode/
+.idea/
