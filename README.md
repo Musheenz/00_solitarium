@@ -1,43 +1,56 @@
-# Lab_Base — prototyping template
+# John's Solitaire
 
-Never build a game in here. Copy the whole folder, rename it, edit
-`EXPERIMENT_NUMBER` / `EXPERIMENT_NAME` in `base/autoload/lab.gd`, go.
+Klondike (Draw One, Standard scoring) built as a gift for John. It's an
+installable offline web app written in plain JavaScript on one canvas, with no
+build step and no dependencies. The full design is in [BRIEF.md](BRIEF.md).
 
-## Starting a new experiment
-1. Copy `Lab_Base/` -> `NN_ExperimentName/` (keeps the godot_ai addon and all settings).
-2. Open it in Godot, edit the two constants in `lab.gd`.
-3. Add an entry to `_LOG.md`.
-4. Build in `res://experiments/` (or anywhere) — `res://base/` is the shared toolkit, tear it up if the idea needs it.
+## Run it locally
 
-## What's in the box
-- `base/autoload/lab.gd` — **Lab** singleton. Restart / slow-mo / pause / debug hotkeys, `Lab.say()` on-screen log,
-  stick-first input helpers (`get_move_input`, `get_look_input`, `curve_stick`, `move_to_world`).
-  Anything can pull input from here: a character, a ship, a cursor, a card hand.
-- `base/player/` — capsule CharacterBody3D. Camera-relative, analog walk, coyote time, jump buffer,
-  variable jump, jump defined by height + time-to-apex. All exports tweakable live.
-- `base/camera/` — orbit rig (Yaw > Pitch > SpringArm3D > Camera3D). Right stick with response curve,
-  mouse look, wall collision, smooth follow, `cam_reset` snaps behind the player.
-- `base/greybox/` — arena with fixed yardsticks: steps 0.5–3.0m, gaps 2–6m (from a 1m platform),
-  a 4m wall, pillars for camera occlusion, a 20° ramp, a stair tower to 8m, red posts every 10m.
-- `base/debug/` — overlay: fps, time scale, gamepad name, player stats, `Lab.say()` log.
+```
+node tools/serve.mjs 8123
+```
 
-## Input map (keyboard / gamepad)
-| action | keyboard | pad |
-|---|---|---|
-| move_* | WASD | left stick |
-| look_* | arrows | right stick |
-| jump | Space | A |
-| crouch | Ctrl | B |
-| interact | E | X |
-| action_alt | F | Y |
-| action_primary | LMB | RT |
-| action_secondary | RMB | LT |
-| bumper_left / right | Q / Tab | LB / RB |
-| sprint | Shift | L3 |
-| cam_reset | C | R3 |
-| pause | Esc | Start |
-| lab_restart | R | Back |
-| lab_debug | F1 | D-pad up |
-| lab_slowmo | F2 | D-pad down |
+Open http://localhost:8123/ (or `?debug=1` for the debug keys). The service
+worker stays off on localhost so edits show up immediately; add `?sw=1` to test
+offline mode locally.
 
-Left-click captures the mouse; Esc (pause) releases it.
+## Tests
+
+```
+node --test tests/rules.test.mjs tests/save.test.mjs
+```
+
+## Deploy
+
+1. `node tools/release.mjs`. This rewrites the precache list in `docs/sw.js` and
+   bumps `CACHE_VERSION`. Run it before every deploy.
+2. Publish `docs/` over HTTPS (GitHub Pages from `/docs`, Netlify, or Cloudflare Pages).
+3. On the Chromebook, open the URL in Chrome and choose Install. After that it
+   runs offline from the shelf icon. Updates apply on the next launch.
+
+## Knobs
+
+- `docs/js/config.js`: palette, layout, timings, and how often quips fire.
+  Every install starts at zero wins.
+- `docs/js/lines.js`: every joke. Add lines freely; they wrap automatically.
+- `docs/audio/`: sound files as `.ogg`, `.mp3` or `.wav`. Missing ones stay silent.
+  - Basic kit: `main_theme` (loops), `card_slot` (card lands), `mistake` (bad drop).
+  - Optional extras that override the basic kit: `place`, `foundation`, `invalid`,
+    `flip`, `pick`, `deal`, `shuffle`, `recycle`, `win_fanfare`, `loss_sting`,
+    `quip_blip`, `ui_click`.
+  - The SOUND button cycles ALL (music and effects) → FX (effects only) → OFF.
+
+## Hidden stuff (Billy only)
+
+- **Ctrl+Shift+J** (or **Ctrl+Alt+J**): set WINS,PLAYED, paste a backup code
+  from the STATS panel, or type `RESET` to wipe all stats.
+- **`?debug=1`**: `W` win sequence, `L` loss dialog, `T` tallest possible column,
+  `B` blunder quip, `F` a real game one double-click from winning
+  (it counts in the stats; W does not). The console also checks that every line fits.
+
+## Differences from the brief
+
+- The minimum layout height is 216 native px instead of 240. An installed app
+  window on the 1366×768 Chromebook is about 688 px tall once the shelf and
+  title bar are gone, and 688/3 = 229. With 240 the game would drop to scale 2.
+- The brief says `python -m http.server`; `tools/serve.mjs` does the same job with Node.

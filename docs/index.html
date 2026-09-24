@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>John's Solitaire</title>
+  <meta name="theme-color" content="#2F4234">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="table" aria-label="John's Solitaire"></canvas>
+  <script type="module" src="js/main.js"></script>
+  <script>
+    // Off on localhost while developing (add ?sw=1 to test offline there).
+    const devHost = /^(localhost|127.0.0.1)$/.test(location.hostname) && !/[?&]sw=1/.test(location.search);
+    if ('serviceWorker' in navigator && location.protocol !== 'file:' && !devHost) {
+      addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>

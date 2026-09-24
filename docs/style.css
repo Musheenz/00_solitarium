@@ -1,0 +1,17 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #2F4234;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+  image-rendering: pixelated;
+  outline: none;
+}
