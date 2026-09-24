@@ -170,7 +170,7 @@ function commit(res, opts = {}) {
 function handleEvents(events, opts) {
   const dur = (STYLES[opts.style] || STYLES.fly).dur;
   for (const e of events) {
-    if (e.t === 'draw') app.sound('flip');
+    if (e.t === 'draw') app.sound('draw');
     else if (e.t === 'recycle') app.sound('recycle');
     else if (e.t === 'flip') app.sound('flip', { volume: 0.8 });
     else if (e.t === 'undo') app.sound('place', { rate: 0.85 });
@@ -336,19 +336,16 @@ app.undoFromLoss = () => {
 app.openStats = () => { app.modal = { type: 'stats' }; requestFrame(); };
 app.closeModal = () => { app.modal = null; setBusy('loss', false); requestFrame(); };
 
-// SOUND button: ALL (music + effects) → FX (effects only) → OFF.
-// Without a music file it's just ON ↔ OFF.
-app.soundLabel = () => {
-  if (!app.data.sound) return 'SOUND: OFF';
-  if (!Audio.hasMusic()) return 'SOUND: ON';
-  return app.data.music ? 'SOUND: ALL' : 'SOUND: FX';
+// Two independent toggles: MUSIC and SOUNDS (effects). Music starts off.
+app.toggleMusic = () => {
+  app.data.music = !app.data.music;
+  Audio.setAudio({ music: app.data.music });
+  persist();
 };
 app.toggleSound = () => {
-  const d = app.data;
-  if (!d.sound) { d.sound = true; d.music = true; }
-  else if (Audio.hasMusic() && d.music) d.music = false;
-  else d.sound = false;
-  Audio.setAudio({ on: d.sound, music: d.music });
+  app.data.sound = !app.data.sound;
+  Audio.setAudio({ on: app.data.sound });
+  if (app.data.sound) app.sound('place'); // so he hears it's back on
   persist();
 };
 

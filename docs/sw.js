@@ -2,7 +2,7 @@
 // launch and never interrupts a game. Run `node tools/release.mjs` before
 // every deploy: it rewrites PRECACHE and bumps CACHE_VERSION.
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v6';
 const CACHE = 'johns-solitaire-' + CACHE_VERSION;
 
 // PRECACHE-START
@@ -72,6 +72,14 @@ const PRECACHE = [
   'assets/ui/loss_card.png',
   'assets/ui/slot_empty.png',
   'assets/ui/stock_recycle.png',
+  'audio/audio.json',
+  'audio/card_slot.wav',
+  'audio/draw_card.wav',
+  'audio/lose_game.wav',
+  'audio/main_theme.ogg',
+  'audio/mistake.wav',
+  'audio/shuffling_cards.wav',
+  'audio/win_game.wav',
   'icons/icon-192.png',
   'icons/icon-512.png',
   'index.html',

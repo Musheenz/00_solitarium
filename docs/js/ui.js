@@ -20,7 +20,7 @@ export function fmtTime(ms) {
 
 // ---------------------------------------------------------------- buttons
 
-export function button(app, id, x, y, w, h, label, action, { primary = false, big = false } = {}) {
+export function button(app, id, x, y, w, h, label, action, { primary = false, big = false, off = false } = {}) {
   const b = { id, x, y, w, h, label, action };
   app.buttons.push(b);
   const hover = app.ui.hover === id;
@@ -30,7 +30,8 @@ export function button(app, id, x, y, w, h, label, action, { primary = false, bi
   let border = COLORS.shadow;
   let textCol = COLORS.text;
   if (primary) { fill = hover ? COLORS.shine : COLORS.gold; textCol = COLORS.ink; border = COLORS.ink; }
-  if (press) fill = primary ? COLORS.goldDeep : '#2C3D31';
+  if (off) fill = hover ? '#B3362F' : COLORS.red; // a toggle that's switched off
+  if (press) fill = primary ? COLORS.goldDeep : off ? '#7C211D' : '#2C3D31';
   if (!press) pixRect(app.ctx, x, y + 1, w, h, COLORS.shadow); // drop edge
   pixRect(app.ctx, x, y + oy, w, h, fill, border);
   if (!press && !primary) { app.ctx.fillStyle = 'rgba(255,255,255,0.08)'; app.ctx.fillRect(x + 2, y + 1, w - 4, 1); }
@@ -76,11 +77,12 @@ export function drawSidebar(app) {
   row('WIN %', stats.played ? Math.round((stats.won / stats.played) * 100) + '%' : '-', 101);
   ctx.fillRect(x0 + 2, 115, w - 4, 1);
 
-  const bh = 18, gap = 3;
-  let y = 120;
+  // five buttons must fit above L.MIN_H (216): 119 + 5 × 19 − 2 = 212
+  const bh = 17, gap = 2;
+  let y = 119;
   const blocked = !!app.modal;
-  const B = (id, label, action) => {
-    const b = button(app, id, x0, y, w, bh, label, action);
+  const B = (id, label, action, opts) => {
+    const b = button(app, id, x0, y, w, bh, label, action, opts);
     b.sidebar = true;
     b.disabled = blocked;
     y += bh + gap;
@@ -88,7 +90,9 @@ export function drawSidebar(app) {
   B('new', 'NEW GAME', () => app.onNewGameButton());
   B('undo', 'UNDO', () => app.onUndo());
   B('stats', 'STATS', () => app.openStats());
-  B('sound', app.soundLabel(), () => app.toggleSound());
+  const music = app.data.music, sfx = app.data.sound;
+  B('music', music ? 'MUSIC: ON' : 'MUSIC: OFF', () => app.toggleMusic(), { off: !music });
+  B('sound', sfx ? 'SOUNDS: ON' : 'SOUNDS: OFF', () => app.toggleSound(), { off: !sfx });
 }
 
 // ---------------------------------------------------------------- panels

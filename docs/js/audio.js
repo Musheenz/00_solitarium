@@ -13,12 +13,13 @@ const EVENTS = {
   foundation: ['foundation', 'card_slot'],
   invalid: ['invalid', 'mistake'],
   flip: ['flip'],
+  draw: ['draw', 'draw_card', 'flip'],
   pick: ['pick'],
   deal: ['deal'],
-  shuffle: ['shuffle'],
+  shuffle: ['shuffle', 'shuffling_cards'],
   recycle: ['recycle'],
-  win_fanfare: ['win_fanfare'],
-  loss_sting: ['loss_sting'],
+  win_fanfare: ['win_fanfare', 'win_game'],
+  loss_sting: ['loss_sting', 'lose_game'],
   quip_blip: ['quip_blip'],
   ui_click: ['ui_click'],
 };
@@ -30,6 +31,7 @@ let sfxGain = null;
 let musicGain = null;
 let musicNode = null;
 const buffers = new Map(); // file name → AudioBuffer
+const early = new Map(); // event → { at, opts } asked for before its file loaded
 let enabled = true;
 let musicOn = true;
 let sfxVol = 1;
@@ -72,7 +74,18 @@ export async function initAudio() {
   applyVolumes();
   const have = await listing();
   const names = new Set(Object.values(EVENTS).flat());
-  for (const name of names) fetchBuffer(name, have).then((b) => b && buffers.set(name, b));
+  for (const name of names) {
+    fetchBuffer(name, have).then((b) => {
+      if (!b) return;
+      buffers.set(name, b);
+      // the first deal fires on the same click that starts loading; catch it up
+      for (const [event, p] of early) {
+        if (!(EVENTS[event] || [event]).includes(name)) continue;
+        early.delete(event);
+        if (ctx.currentTime - p.at < 0.5) play(event, p.opts);
+      }
+    });
+  }
   for (const name of MUSIC) {
     const b = await fetchBuffer(name, have);
     if (b) {
@@ -87,7 +100,7 @@ export async function initAudio() {
 function applyVolumes() {
   if (!ctx) return;
   sfxGain.gain.value = enabled ? sfxVol : 0;
-  musicGain.gain.setTargetAtTime(enabled && musicOn ? musicVol : 0, ctx.currentTime, 0.15);
+  musicGain.gain.setTargetAtTime(musicOn ? musicVol : 0, ctx.currentTime, 0.15);
 }
 
 function startMusic() {
@@ -107,7 +120,10 @@ export function play(event, { rate = 1, volume = 1 } = {}) {
   if (!ctx || !enabled) return;
   const chain = EVENTS[event] || [event];
   const b = chain.map((n) => buffers.get(n)).find(Boolean);
-  if (!b) return;
+  if (!b) {
+    early.set(event, { at: ctx.currentTime, opts: { rate, volume } });
+    return;
+  }
   try {
     const src = ctx.createBufferSource();
     src.buffer = b;

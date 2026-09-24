@@ -38,7 +38,8 @@ node --test tests/rules.test.mjs tests/save.test.mjs
   - Optional extras that override the basic kit: `place`, `foundation`, `invalid`,
     `flip`, `pick`, `deal`, `shuffle`, `recycle`, `win_fanfare`, `loss_sting`,
     `quip_blip`, `ui_click`.
-  - The SOUND button cycles ALL (music and effects) → FX (effects only) → OFF.
+  - Two sidebar toggles, MUSIC and SOUNDS (effects), turn red when off. A fresh
+    install starts with music off and sounds on.
 
 ## Hidden stuff (Billy only)
 

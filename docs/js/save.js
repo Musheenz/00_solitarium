@@ -20,8 +20,8 @@ export function freshSave() {
     stats: freshStats(),
     game: null,        // game.js state of the game in progress
     counted: false,    // has the game in progress been counted as played?
-    sound: true,
-    music: true,
+    sound: true,       // effects
+    music: false,      // off until John asks for it, so it never startles him
     sfxVol: 1,
     musicVol: 0.5,
   };
